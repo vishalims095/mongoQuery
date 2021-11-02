@@ -1,6 +1,7 @@
 # mongoQuery
 some complex mongo query for self learning pupose
 
+# 1. Fix after decimal value
 ```
 let data = await eventModel.aggregate([{
     $lookup : {
@@ -57,4 +58,56 @@ let data = await eventModel.aggregate([{
         paymentMailSent : '$paymentMailSent'
     }
 }, {$match : query}])
+```
+
+# 2. Condition in mongo query
+```
+let paymentData = await bookingModel.aggregate([{$lookup : {
+    from : 'eventDetails',
+    localField : 'eventId',
+    foreignField : '_id',
+    as : 'eventData'
+}
+},{$unwind : '$eventData'}, {$lookup : {
+    from : 'user',
+    localField : 'eventData.userId',
+    foreignField : '_id',
+    as : 'actorData'
+}},
+{$unwind : '$actorData'},
+{$lookup : {
+    from : 'cardDetails',
+    localField : 'cardId',
+    foreignField : '_id',
+    as : 'cardData'
+}}, {$unwind : '$cardData'},
+{$project : {
+    "actorEarning" : {
+        $cond : {
+            if : {$eq : ['CY', "$actorData.companyEstablishmentCountry"]},
+            then :  { '$add' : [ '$actorEarning', {'$multiply' : [ '$actorEarning', 0]}] },
+            else : '$actorEarning'
+        }
+    },
+    "cardType" : '$cardData.cardType',
+    "paymentId" : '$transectionId',
+    "transectionTimestamp" : "$transectionTimestamp",
+    "method" : "$cardData.cardType",
+    "amountReceived" : "$totalPrice",
+    "isVoucherApplied" : '$isVoucherApplied',
+    "voucherAmt" : '$voucherAmt',
+    'createdAt' : '$createdAt',
+    "eventId" : "$eventData.randomEventId",
+    "uniqueEventId" : '$eventData._id',
+    "commision" : "$eventData.commision",
+    "eventName" : "$eventData.eventTitle",
+    "eventDateTime" : "$eventData.eventDateAndTime",
+    "artistName" : "$actorData.firstName",
+    "artistLastName" : "$actorData.lastName",
+    "artistAmount" : '0',
+    "emailSent" : 'false',
+    "paymentType" : 'Ticket purchase'
+
+}}, {$match : query}])
+
 ```
