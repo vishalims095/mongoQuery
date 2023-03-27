@@ -111,3 +111,52 @@ let paymentData = await bookingModel.aggregate([{$lookup : {
 }}, {$match : query}])
 
 ```
+
+
+# 3. If Condition not matched return data with geonear query
+
+```
+db.serviceIndividual.aggregate([
+      {
+        $geoNear: {
+                    near: {
+                        type: "Point",
+                        coordinates: [77.1025, 28.7041 ]
+                    },
+                   distanceField: "distance",
+                   maxDistance: 5000,
+                   spherical: true
+                }   
+    },
+  
+    {
+        $lookup : {
+            from : 'providerService',
+            localField : 'serviceType',
+            foreignField : '_id',
+            as : 'serviceData'
+        }
+    },
+    {$unwind :{
+        "path": "$serviceData",
+        "preserveNullAndEmptyArrays": true
+   
+    }
+
+    },
+    {
+        $lookup : {
+            from : 'service',
+            localField : 'serviceData.subCategoryId',
+            foreignField : '_id',
+            as : 'subCatData'
+        }
+    },
+    
+    {$unwind : {
+        "path": "$subCatData",
+        "preserveNullAndEmptyArrays": true
+    }},
+    
+    ])
+```
