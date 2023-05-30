@@ -160,3 +160,23 @@ db.serviceIndividual.aggregate([
     
     ])
 ```
+# 4. Add Condition in Mongo Lookup
+
+```
+ "serviceStatus": {
+                    $cond: {
+                        if: { $eq: ["$isCancelled", true] },
+                        then: "cancelled",
+                        else: "$serviceStatus"
+                    }
+                }
+```
+
+# 5. if Condition not matched in lookup and you want data
+
+```
+ {$unwind : {
+                "path" : "$allocatedStaff",
+                "preserveNullAndEmptyArrays": true
+            }},
+```
