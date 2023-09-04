@@ -180,3 +180,46 @@ db.serviceIndividual.aggregate([
                 "preserveNullAndEmptyArrays": true
             }},
 ```
+
+# 6. Polygon query in mongodb
+
+```
+ geopositions: [ ],
+geoFencingSchema.index({
+    'geopositions': '2dsphere'
+})
+// Save Data
+let coordinates = []
+		for(let i = 0;i<location.length;i++){
+			// let data = { 
+			// 	type: 'Point', "coordinates": [location[i].lng, location[i].lat] 
+			// }
+			coordinates.push([location[i]['lng'], location[i]['lat']])
+				
+		}
+		coordinates.push([location[0]['lng'], location[0]['lat']])
+		
+		let data = req.body
+		data['locations'] = location
+		data['geopositions']  =  {
+			  "type":"Polygon",
+			  "coordinates":[coordinates]
+			}
+// Search Data
+let locationdata = await geoFencingModel.find({ 
+            category : category,
+            geopositions: {
+                $geoIntersects: {
+                  $geometry: {
+                    "type": "Point",
+                    "coordinates": [longitude,latitude]
+                  }
+                }
+              }
+        })
+
+        if(locationdata.length > 0){
+            throw new Error('Service Unavailable.')
+        }
+
+```
