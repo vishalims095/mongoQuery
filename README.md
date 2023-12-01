@@ -223,3 +223,9 @@ let locationdata = await geoFencingModel.find({
         }
 
 ```
+
+# 7. Update data in array of objects
+```
+let updateData = await staffModel.findOneAndUpdate({_id : staff_id, 'available_slots' : {$elemMatch  : {startDateUnixTimeStamp : startDateTimeStamp}}}, {$set : {'available_slots.$.status' : status}}, {new : true})
+        
+```
